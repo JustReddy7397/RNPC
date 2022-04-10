@@ -1,0 +1,8 @@
+name: RNPC
+version: '${project.version}'
+main: ga.justreddy.wiki.rnpc.RNPC
+api-version: 1.18
+authors: [JustReddy]
+commands:
+  npc:
+    description: helloo
