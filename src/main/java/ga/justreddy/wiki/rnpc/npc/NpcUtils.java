@@ -1,6 +1,7 @@
 package ga.justreddy.wiki.rnpc.npc;
 
 import ga.justreddy.wiki.rnpc.RNPC;
+import ga.justreddy.wiki.rnpc.npc.versions.v_1_10_R1.V_1_10_R1;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.V1_8_R3;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.V1_9_R2;
 import lombok.SneakyThrows;
@@ -36,9 +37,6 @@ public class NpcUtils {
     }
 
     private void load(String id) {
-/*        npcIdListById.remove(npcIdListByString.get(id).getEntityId());
-        npcIdListByString.remove(id);
-        npcIdList.remove(id);*/
         Location location = (Location) RNPC.getPlugin().getNpcConfig().getConfig().get("npc." + id.toLowerCase() + ".location");
         if(location != null) create(location, id.toLowerCase());
     }
@@ -53,6 +51,7 @@ public class NpcUtils {
                 iNpc = new V1_9_R2(id, location);
                 break;
             case "v1_10_R1":
+                iNpc = new V_1_10_R1(id, location);
                 break;
             case "v1_11_R1":
                 break;

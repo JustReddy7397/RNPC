@@ -15,9 +15,10 @@ public class MainCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) sender.sendMessage(ChatColor.translateAlternateColorCodes('&', tellPlayersOnly()));
+        if (!(sender instanceof Player))
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', tellPlayersOnly()));
         Player player = (Player) sender;
-        try{
+        try {
             switch (args[0]) {
                 case "create":
                     createCommand(player, args);
@@ -47,8 +48,8 @@ public class MainCommand implements CommandExecutor {
                     sendHelpMessage(player);
                     break;
             }
-        }catch (IndexOutOfBoundsException ex){
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "Invalid arguments!"));
+        } catch (IndexOutOfBoundsException ex) {
+            sendHelpMessage(player);
         }
         return true;
     }
@@ -66,31 +67,42 @@ public class MainCommand implements CommandExecutor {
     }
 
     private void sendHelpMessage(Player player) {
-        // TODO
+        Utils.sendMessage(player,
+                "&a%line%",
+                "&a/npc create <id> &7- &aCreates a NPC",
+                "&a/npc delete <id> &7- &aDeletes a NPC",
+                "&a/npc reload &7- &aReloads the configs",
+                "&a/npc setname <id> <name> &7- &aSets the name of a NPC",
+                "&a/npc setskin <id> <skin> &7- &aSets the skin of a NPC",
+                "&a/npc showname <id> <true/false> &7- &aEnabled/Disables the NPC name",
+                "&a/npc move <id> &7- &aMoves the NPC to your location",
+                "&a/npc command <id> [-s(server), -p(layer), -m(essage)] <command/message/server>",
+                "&a%line%"
+        );
     }
 
     private void createCommand(Player player, String[] args) {
-        try{
+        try {
             String id = args[1];
-            if(NpcUtils.getUtils().doesExist(id)){
+            if (NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Already exists!");
                 return;
             }
             NpcUtils.getUtils().create(player.getLocation(), id);
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc create <id>"));
         }
     }
 
     private void deleteCommand(Player player, String[] args) {
-        try{
+        try {
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id)){
+            if (!NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
             NpcUtils.getUtils().delete(id, true);
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage("owo");
         }
     }
@@ -104,9 +116,9 @@ public class MainCommand implements CommandExecutor {
     }
 
     private void setNameCommand(Player player, String[] args) {
-        try{
+        try {
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id)){
+            if (!NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -118,15 +130,15 @@ public class MainCommand implements CommandExecutor {
 
             NpcUtils.getUtils().setName(id, name);
 
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc setname <id> <name>"));
         }
     }
 
     private void setSkinCommand(Player player, String[] args) {
-        try{
+        try {
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id)){
+            if (!NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -135,46 +147,46 @@ public class MainCommand implements CommandExecutor {
 
             NpcUtils.getUtils().setSkin(id, skin);
 
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc setskin <id> <skin>"));
         }
     }
 
     private void setCustomNameVisibleCommand(Player player, String[] args) {
-        try{
+        try {
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id)){
+            if (!NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
             boolean customName = Boolean.parseBoolean(args[2]);
             NpcUtils.getUtils().showCustomName(id, customName);
             player.sendMessage(Utils.format("&aSuccessfully " + (customName ? "enabled" : "disabled") + " the showing of the name"));
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc setskin <id> <skin>"));
         }
     }
 
     private void moveCommand(Player player, String[] args) {
-        try{
+        try {
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id)){
+            if (!NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
             NpcUtils.getUtils().move(id, player.getLocation());
             player.sendMessage(Utils.format("&aSuccessfully moved"));
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc move <id>"));
         }
     }
 
     private void addCommand(Player player, String[] args) {
-        try{
+        try {
 
             String id = args[1];
 
-            if(!NpcUtils.getUtils().doesExist(id)){
+            if (!NpcUtils.getUtils().doesExist(id)) {
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -184,11 +196,11 @@ public class MainCommand implements CommandExecutor {
                 command.append(args[i]).append(" ");
             }
 
-            if(command.toString().startsWith("-s") || command.toString().startsWith("-server")) {
+            if (command.toString().startsWith("-s") || command.toString().startsWith("-server")) {
                 command = new StringBuilder(command.toString().replace("-s ", "server:").replace("-server ", "server:"));
             }
 
-            if(command.toString().startsWith("-p") || command.toString().startsWith("-player")){
+            if (command.toString().startsWith("-p") || command.toString().startsWith("-player")) {
                 command = new StringBuilder(command.toString().replace("-p ", "player:").replace("-player ", "player:"));
             }
 
@@ -198,7 +210,7 @@ public class MainCommand implements CommandExecutor {
 
             NpcUtils.getUtils().addCommand(id, command.toString());
 
-        }catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc move <id>"));
         }
     }

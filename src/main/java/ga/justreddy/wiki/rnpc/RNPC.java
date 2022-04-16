@@ -14,14 +14,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 public final class RNPC extends JavaPlugin {
 
-    @Getter private static RNPC plugin;
+    @Getter
+    private static RNPC plugin;
 
-    @Getter private YamlConfig npcConfig;
+    @Getter
+    private YamlConfig npcConfig;
 
-    @Getter private final String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+    @Getter
+    private final String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
     private final int NPC_VERSION = 1;
 
@@ -29,8 +33,9 @@ public final class RNPC extends JavaPlugin {
     public void onEnable() {
         // Plugin startup logic
         plugin = this;
+        if(!start()) return;
         getCommand("npc").setExecutor(new MainCommand());
-        if(!loadConfigs()) return;
+        if (!loadConfigs()) return;
         getServer().getPluginManager().registerEvents(new EventManager(), this);
         NpcUtils.getUtils().load();
         addPlayersToPipeline();
@@ -41,11 +46,13 @@ public final class RNPC extends JavaPlugin {
             switch (getVersion()) {
                 case "v1_8_R3":
                     NpcPipeLine.getPipeLine().inject(p);
+                    getLogger().log(Level.INFO, "Found NMS version " + getVersion() + ", using it!");
                     break;
                 case "v1_9_R2":
                     ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_10_R1":
+                    ga.justreddy.wiki.rnpc.npc.versions.v_1_10_R1.NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_11_R1":
                     break;
@@ -58,7 +65,7 @@ public final class RNPC extends JavaPlugin {
                 case "v1_15_R1":
                     break;
                 default:
-                    Utils.error(null, "Failed to find NMS version for " + getVersion() , true);
+                    Utils.error(null, "Failed to find NMS version for " + getVersion(), true);
                     break;
 
             }
@@ -79,13 +86,13 @@ public final class RNPC extends JavaPlugin {
 
             currentlyLoading = "npcs.yml";
             npcConfig = new YamlConfig(currentlyLoading);
-            if(npcConfig.isOutdated(NPC_VERSION)){
+            if (npcConfig.isOutdated(NPC_VERSION)) {
                 System.out.println("Outdated ");
                 return false;
             }
 
 
-        }catch (IOException | InvalidConfigurationException ex) {
+        } catch (IOException | InvalidConfigurationException ex) {
             ex.printStackTrace();
             return false;
         }
@@ -93,8 +100,23 @@ public final class RNPC extends JavaPlugin {
         return true;
     }
 
-    private void loadNpc() {
+    private boolean start() {
+        switch (getVersion()) {
+            case "v1_8_R3":
+            case "v1_10_R1":
+            case "v1_9_R2":
+            case "v1_11_R1":
+            case "v1_12_R1":
+            case "v1_13_R2":
+            case "v1_14_R1":
+            case "v1_15_R1":
+                getLogger().log(Level.INFO, "Found NMS version " + getVersion() + ", using it!");
+                return true;
+            default:
+                Utils.error(null, "Failed to find NMS version for " + getVersion(), true);
+                return false;
 
+        }
     }
 
 }

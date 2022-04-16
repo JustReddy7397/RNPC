@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Utility;
+import org.bukkit.entity.Player;
 
 
 public class Utils {
@@ -16,6 +17,17 @@ public class Utils {
     public static String format(String msg) {
         return ChatColor.translateAlternateColorCodes('&', msg);
     }
+
+    public static void sendMessage(Player player, String message) {
+        player.sendMessage(ChatColor.translateAlternateColorCodes('&', message.replace("%line%", CHAT_LINE)));
+    }
+
+    public static void sendMessage(Player player, String... message) {
+        for (String line : message) {
+            sendMessage(player, line);
+        }
+    }
+
 
     public static void error(Throwable throwable, String description, boolean disable) {
         if (throwable != null) throwable.printStackTrace();
@@ -46,7 +58,7 @@ public class Utils {
     }
 
     public static void sendConsole(String message) {
-        Bukkit.getConsoleSender().sendMessage(format(message).replace("%line%", CONSOLE_LINE));
+        Bukkit.getConsoleSender().sendMessage(format(message.replace("%line%", CONSOLE_LINE)));
     }
 
     public static void sendConsole(String... message) {
