@@ -9,7 +9,6 @@ import lombok.SneakyThrows;
 import net.minecraft.server.v1_8_R3.Packet;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -30,7 +29,7 @@ public class NpcPipeLine {
         final CraftPlayer craftPlayer = (CraftPlayer) player;
         final Channel channel = craftPlayer.getHandle().playerConnection.networkManager.channel;
         channels.put(player.getUniqueId(), channel);
-        if(player.isOnline()) initPipeLine(player, channel);
+        initPipeLine(player, channel);
     }
 
     private void initPipeLine(Player player, Channel channel) {
@@ -46,7 +45,7 @@ public class NpcPipeLine {
         channel.pipeline().addAfter("decoder", "NpcPipeLine", new MessageToMessageDecoder<Packet<?>>() {
 
             @Override
-            protected void decode(ChannelHandlerContext channel, Packet<?> packet, List<Object> args) throws Exception {
+            protected void decode(ChannelHandlerContext channel, Packet<?> packet, List<Object> args) {
                 args.add(packet);
                 readPacket(player, packet);
             }
@@ -63,17 +62,16 @@ public class NpcPipeLine {
         int entityId = (int) getObjectFromPacket(packet, "a");
         String action = getObjectFromPacket(packet, "action").toString();
         if(action.equals("INTERACT") || action.equals("INTERACT_AT")) {
-            INpc iNpc;
             if(!checkAndUpdateLastClick(player.getUniqueId())) return;
-            else if((iNpc = NpcUtils.getUtils().getNpcFromEntityId(entityId)) != null){
-                iNpc.runNpcCommands(player);
-            }
+            INpc iNpc = NpcUtils.getUtils().getNpcFromEntityId(entityId);
+            if(iNpc == null) return;
+            iNpc.runNpcCommands(player);
         }
     }
 
     private boolean checkAndUpdateLastClick(UUID uuid) {
         long lastInteract = lastInteraction.isEmpty() ? 0L : lastInteraction.getOrDefault(uuid, 0L);
-        if(lastInteraction.isEmpty() || System.currentTimeMillis()-lastInteract < 500) return false;
+        if(System.currentTimeMillis()-lastInteract < 500) return false;
         boolean isInMap = lastInteract > 0;
         lastInteract = System.currentTimeMillis();
         if(isInMap) lastInteraction.replace(uuid, lastInteract);
@@ -81,7 +79,6 @@ public class NpcPipeLine {
         return true;
     }
 
-    @NotNull
     private Object getObjectFromPacket(Packet<?> packet, String object) {
         try{
             Field field = packet.getClass().getDeclaredField(object);

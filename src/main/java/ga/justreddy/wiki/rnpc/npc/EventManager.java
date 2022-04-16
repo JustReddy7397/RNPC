@@ -1,6 +1,6 @@
 package ga.justreddy.wiki.rnpc.npc;
 
-import ga.justreddy.wiki.rnpc.RNPC;
+import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.NpcPipeLine;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -21,11 +21,49 @@ public class EventManager implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         NpcUtils.getUtils().showNpcs(e.getPlayer());
+        switch (Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3]) {
+            case "v1_8_R3":
+                NpcPipeLine.getPipeLine().inject(e.getPlayer());
+                break;
+            case "v1_9_R2":
+                break;
+            case "v1_10_R1":
+                break;
+            case "v1_11_R1":
+                break;
+            case "v1_12_R1":
+                break;
+            case "v1_13_R2":
+                break;
+            case "v1_14_R1":
+                break;
+            case "v1_15_R1":
+                break;
+        }
     }
 
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent e) {
         NpcUtils.getUtils().showNpcs(e.getPlayer());
+        switch (Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3]) {
+            case "v1_8_R3":
+                NpcPipeLine.getPipeLine().inject(e.getPlayer());
+                break;
+            case "v1_9_R2":
+                break;
+            case "v1_10_R1":
+                break;
+            case "v1_11_R1":
+                break;
+            case "v1_12_R1":
+                break;
+            case "v1_13_R2":
+                break;
+            case "v1_14_R1":
+                break;
+            case "v1_15_R1":
+                break;
+        }
     }
 
     @EventHandler
@@ -40,10 +78,9 @@ public class EventManager implements Listener {
     }
 
 
-    private boolean runCommands(Player player, INpc npc) {
-        if (!lastNpcInteractDelayis(player, 500)) return false;
+    private void runCommands(Player player, INpc npc) {
+        if (!lastNpcInteractDelayis(player, 500)) return;
         npc.runNpcCommands(player);
-        return true;
     }
 
     private boolean lastNpcInteractDelayis(Player player, long delay) {

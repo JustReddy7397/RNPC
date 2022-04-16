@@ -1,6 +1,5 @@
 package ga.justreddy.wiki.rnpc;
 
-import com.github.helpfuldeer.commandlib.CommandLib;
 import ga.justreddy.wiki.rnpc.commands.MainCommand;
 import ga.justreddy.wiki.rnpc.npc.EventManager;
 import ga.justreddy.wiki.rnpc.npc.INpc;

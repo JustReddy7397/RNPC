@@ -2,7 +2,6 @@ package ga.justreddy.wiki.rnpc.npc;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 public interface INpc {
 

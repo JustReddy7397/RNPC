@@ -1,5 +1,7 @@
 package ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import de.tr7zw.changeme.nbtapi.NBTEntity;
 import ga.justreddy.wiki.rnpc.RNPC;
 import ga.justreddy.wiki.rnpc.npc.INpc;
@@ -14,11 +16,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftScoreboard;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -38,6 +42,7 @@ public class V1_8_R3 implements INpc {
     private EntityPlayer npcAsPlayer;
     private ProfileClass profile;
     private List<String> npcCommands;
+    private boolean customName;
 
     public V1_8_R3(String id, Location location) {
         this.id = id;
@@ -47,21 +52,23 @@ public class V1_8_R3 implements INpc {
     }
 
     private void initVariables() {
-        if(checkIfNpcHasData()) initVariablesFromExisting();
+        if (checkIfNpcHasData()) initVariablesFromExisting();
         else initNewVariables();
     }
 
     private void initVariablesFromExisting() {
         name = RNPC.getPlugin().getNpcConfig().getConfig().getString("npc." + id + ".name");
-        skinOwner = RNPC.getPlugin().getNpcConfig().getConfig().getString("npc." + id + ".skullOwner");
+        skinOwner = RNPC.getPlugin().getNpcConfig().getConfig().getString("npc." + id + ".skinOwner");
+        customName = RNPC.getPlugin().getNpcConfig().getConfig().getBoolean("npc." + id + ".customName");
         npcCommands = config.getStringList("npc." + id + ".commands");
         if (name == null || name.equals("")) name = " ";
         if (skinOwner == null || skinOwner.equals("")) skinOwner = " ";
     }
 
     private void initNewVariables() {
-        name = " ";
-        skinOwner = " ";
+        name = id;
+        skinOwner = id;
+        customName = true;
         npcCommands = new ArrayList<>();
     }
 
@@ -75,23 +82,23 @@ public class V1_8_R3 implements INpc {
         config.set("npc." + id + ".skinOwner", skinOwner);
         config.set("npc." + id + ".type", npcType.toString().toLowerCase());
         config.set("npc." + id + ".location", location);
+        config.set("npc." + id + ".customName", customName);
         config.set("npc." + id + ".commands", npcCommands);
         RNPC.getPlugin().getNpcConfig().save();
     }
 
     private void createNewNpc() {
         profile = new ProfileClass();
-        if(checkIfNpcHasData()) initNpcType();
+        if (checkIfNpcHasData()) initNpcType();
         else npcType = EntityType.PLAYER;
         loadNewNpc();
         killNearbyMatchingEntities();
-
     }
 
     private void killNearbyMatchingEntities() {
-        if(npcType == EntityType.PLAYER) return;
-        for(Entity entity : npcAsEntity.getNearbyEntities(0.0, 0.5, 0.0)) {
-            if(entity.getCustomName() != null && entity.getCustomName().equals(name) && entity.getType() == npcType) {
+        if (npcType == EntityType.PLAYER) return;
+        for (Entity entity : npcAsEntity.getNearbyEntities(0.0, 0.5, 0.0)) {
+            if (entity.getCustomName() != null && entity.getCustomName().equals(name) && entity.getType() == npcType) {
                 entity.remove();
             }
         }
@@ -101,24 +108,25 @@ public class V1_8_R3 implements INpc {
     private void initNpcType() {
         String typeAsString = RNPC.getPlugin().getNpcConfig().getConfig().getString("npc." + id + ".type");
         npcType = null;
-        try{
-            if(typeAsString == null ||
+        try {
+            if (typeAsString == null ||
                     typeAsString.trim().equals("") ||
-                    (npcType = EntityType.valueOf(typeAsString.toUpperCase().replace(" ", "_"))) == null) npcType = EntityType.PLAYER;
-        }catch (Exception ex) {
+                    (npcType = EntityType.valueOf(typeAsString.toUpperCase().replace(" ", "_"))) == null)
+                npcType = EntityType.PLAYER;
+        } catch (Exception ex) {
             npcType = EntityType.PLAYER;
         }
     }
 
     private void loadNewNpc() {
-        if(npcType == EntityType.PLAYER) loadNewPlayerNpc();
+        if (npcType == EntityType.PLAYER) loadNewPlayerNpc();
         else loadNewEntityNpc();
         save();
     }
 
     private void loadNewPlayerNpc() {
-        MinecraftServer server = ((CraftServer)Bukkit.getServer()).getServer();
-        WorldServer world = ((CraftWorld)location.getWorld()).getHandle();
+        MinecraftServer server = ((CraftServer) Bukkit.getServer()).getServer();
+        WorldServer world = ((CraftWorld) location.getWorld()).getHandle();
         npcAsPlayer = new EntityPlayer(server, world, profile.getProfile(), new PlayerInteractManager(world));
         npcAsPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         npcAsPlayer.setCustomNameVisible(true);
@@ -131,13 +139,13 @@ public class V1_8_R3 implements INpc {
     @SneakyThrows
     private void setNpcName() {
         boolean nameValid = true;
-        if(name == null || name.trim().equals("")) name = " ";
-        if(name.length() > 16) nameValid = false;
-        try{
+        if (name == null || name.trim().equals("")) name = " ";
+        if (name.length() > 16) nameValid = false;
+        try {
             Field field = profile.getProfile().getClass().getDeclaredField("name");
             field.setAccessible(true);
             field.set(profile.getProfile(), ChatColor.translateAlternateColorCodes('&', nameValid ? name : name.substring(0, 16)));
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         config.set("npc." + id + ".name", name);
@@ -145,16 +153,16 @@ public class V1_8_R3 implements INpc {
     }
 
     private void setNpcSkin() {
-        if(skinOwner == null || skinOwner.trim().equals("")) return;
+        if (skinOwner == null || skinOwner.trim().equals("")) return;
         profile.updateSkinOwner(skinOwner);
 
     }
 
     private void loadNewEntityNpc() {
-        if(!checkIfNpcIsDead()) return;
+        if (!checkIfNpcIsDead()) return;
         npcAsEntity = getNewEntityNpc();
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
-            if(!checkIfNpcIsDead()) {
+            if (!checkIfNpcIsDead()) {
                 NBTEntity entity = new NBTEntity(npcAsEntity);
                 entity.setInteger("Invulnerable", 1);
             }
@@ -167,7 +175,7 @@ public class V1_8_R3 implements INpc {
         nbtEntity.setInteger("Silent", 1);
         nbtEntity.setInteger("NoAI", 1);
         nbtEntity.setInteger("NoGravity", 1);
-        entity.setCustomNameVisible(true);
+        entity.setCustomNameVisible(customName);
         entity.setCustomName(ChatColor.translateAlternateColorCodes('&', name));
         return entity;
     }
@@ -178,24 +186,22 @@ public class V1_8_R3 implements INpc {
 
     @Override
     public void setLocation(Location location) {
-        if(location == null) return;
-
+        if (location == null) return;
         this.location = location;
-        this.location.setYaw(0f);
-        this.location.setPitch(0f);
-
+        this.location.setYaw(location.getYaw());
+        this.location.setPitch(location.getPitch());
         refreshNpc();
     }
 
     private void refreshNpc() {
-        if(npcType == EntityType.PLAYER) refreshPlayerNpc();
+        if (npcType == EntityType.PLAYER) refreshPlayerNpc();
         else if (npcAsEntity != null && !checkIfNpcIsDead()) npcAsEntity.teleport(location);
     }
 
     private void refreshPlayerNpc() {
-        if(npcAsPlayer == null) return;
+        if (npcAsPlayer == null) return;
         hide();
-        npcAsPlayer.setLocation(location.getX(), location.getY(),location.getZ(), 0f, 0f);
+        npcAsPlayer.setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         show();
     }
 
@@ -205,28 +211,39 @@ public class V1_8_R3 implements INpc {
         connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npcAsPlayer));
         connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) 0));
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
-            if(skinOwner != null && !skinOwner.trim().equals("")) sendNpcSkinPackets(connection);
+            if (skinOwner != null && !skinOwner.trim().equals("")) sendNpcSkinPackets(connection);
             connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcAsPlayer));
+            ScoreboardTeam team = new ScoreboardTeam(((CraftScoreboard) Bukkit.getScoreboardManager().getMainScoreboard()).getHandle(), npcAsPlayer.getName());
+            if(!customName) {
+                team.setNameTagVisibility(ScoreboardTeamBase.EnumNameTagVisibility.NEVER);
+                connection.sendPacket(new PacketPlayOutScoreboardTeam(team, 1));
+                connection.sendPacket(new PacketPlayOutScoreboardTeam(team, 0));
+                connection.sendPacket(new PacketPlayOutScoreboardTeam(team, new ArrayList<String>(){{add(npcAsPlayer.getName());}}, 3));
+            }else{
+                team.setNameTagVisibility(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS);
+            }
         }, 50);
+        Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () ->
+                connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F))),
+                5);
     }
 
     private void sendNpcSkinPackets(PlayerConnection connection) {
         DataWatcher watcher = npcAsPlayer.getDataWatcher();
         byte bytes = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40;
-        watcher.watch(10,  bytes);
+        watcher.watch(10, bytes);
         connection.sendPacket(new PacketPlayOutEntityMetadata(npcAsPlayer.getId(), watcher, true));
     }
 
 
     @Override
     public void hide(Player player) {
-        if(npcType == EntityType.PLAYER) hidePlayerNpc(player);
-        else if(!checkIfNpcIsDead()) hideEntityNpc();
+        if (npcType == EntityType.PLAYER) hidePlayerNpc(player);
+        else if (!checkIfNpcIsDead()) hideEntityNpc();
     }
 
     private void hidePlayerNpc(Player player) {
         ((CraftPlayer) player).getHandle().playerConnection.sendPacket(new PacketPlayOutEntityDestroy(npcAsPlayer.getId()));
-
     }
 
     private void hideEntityNpc() {
@@ -236,26 +253,26 @@ public class V1_8_R3 implements INpc {
 
     @Override
     public void hide() {
-        for(Player p : location.getWorld().getPlayers()) {
+        for (Player p : location.getWorld().getPlayers()) {
             hide(p);
         }
     }
 
     @Override
     public void show(Player player) {
-        if(!player.getWorld().equals(location.getWorld())) return;
-        if(npcType == EntityType.PLAYER) showPlayerNpc(player);
+        if (!player.getWorld().equals(location.getWorld())) return;
+        if (npcType == EntityType.PLAYER) showPlayerNpc(player);
         else showNpcEntity(player);
     }
 
     private void showNpcEntity(Player player) {
-        if(!player.getWorld().equals(location.getWorld())) return;
+        if (!player.getWorld().equals(location.getWorld())) return;
         loadNewEntityNpc();
     }
 
     @Override
     public void show() {
-        for(Player p : location.getWorld().getPlayers()) {
+        for (Player p : location.getWorld().getPlayers()) {
             show(p);
         }
     }
@@ -263,7 +280,7 @@ public class V1_8_R3 implements INpc {
     @Override
     public void refresh() {
         hide();
-        if(getLocation() != null) location = getLocation();
+        if (getLocation() != null) location = getLocation();
         initNewVariables();
         createNewNpc();
     }
@@ -275,25 +292,43 @@ public class V1_8_R3 implements INpc {
 
     @Override
     public void runNpcCommands(Player player) {
-        if(player == null || npcCommands.isEmpty()) return;
-        for(String cmd : npcCommands) {
-            if(cmd.startsWith("/")) cmd = cmd.replaceFirst("/", "");
+        if (player == null || npcCommands.isEmpty()) return;
+        for (String cmd : npcCommands) {
+            if (cmd.startsWith("/")) cmd = cmd.replaceFirst("/", "");
             boolean playerCmd = checkIfCommandIsPlayer(cmd);
-            if(playerCmd) {
+            boolean serverCmd = cmd.startsWith("server:");
+            if (playerCmd) {
                 cmd = cmd.replaceFirst("player:", "");
-                if(cmd.startsWith("/")) cmd = cmd.replaceFirst("/", "");
+                if (cmd.startsWith("/")) cmd = cmd.replaceFirst("/", "");
             }
 
-            if(checkIfCommandIsValid(cmd.split(" ")[0])) runCommand(player, cmd, playerCmd);
+            if(serverCmd) {
+                cmd = cmd.replace("server:", "");
+                sendServer(player, cmd);
+                return;
+            }
+
+            if (checkIfCommandIsValid(cmd.split(" ")[0])) runCommand(player, cmd, playerCmd);
 
         }
     }
-    
+
     private void runCommand(Player player, String command, boolean playerCmd) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
             String cmd = ChatColor.translateAlternateColorCodes('&', command).replace("%player%", player.getName());
-            if(playerCmd) player.performCommand(cmd);
+            if (playerCmd) player.performCommand(cmd);
             else Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        }, 2);
+    }
+
+    private void sendServer(Player player, String serverName) {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("ConnectOther");
+                out.writeUTF(player.getName());
+                out.writeUTF(serverName);
+                Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(RNPC.getPlugin(), "BungeeCord");
+                player.sendPluginMessage(RNPC.getPlugin(), "BungeeCord", out.toByteArray());
         }, 2);
     }
 

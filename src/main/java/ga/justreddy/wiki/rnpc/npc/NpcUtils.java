@@ -5,8 +5,10 @@ import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.V1_8_R3;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
+import javax.persistence.EntityTransaction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +32,14 @@ public class NpcUtils {
             Location location = (Location) RNPC.getPlugin().getNpcConfig().getConfig().get("npc." + id + ".location");
             if(location != null) create(location, id);
         }
+    }
+
+    private void load(String id) {
+/*        npcIdListById.remove(npcIdListByString.get(id).getEntityId());
+        npcIdListByString.remove(id);
+        npcIdList.remove(id);*/
+        Location location = (Location) RNPC.getPlugin().getNpcConfig().getConfig().get("npc." + id + ".location");
+        if(location != null) create(location, id);
     }
 
     public void create(Location location, String id ) {
@@ -66,7 +76,7 @@ public class NpcUtils {
     }
 
     @SneakyThrows
-    public void delete(String id) {
+    public void delete(String id, boolean deleteFile) {
         INpc iNpc = npcIdListByString.get(id);
         if(iNpc == null) return;
         iNpc.hide();
@@ -74,8 +84,10 @@ public class NpcUtils {
         npcIdListById.remove(iNpc.getEntityId());
         npcIdList.remove(id);
         saveNpcList();
-        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id, null);
-        RNPC.getPlugin().getNpcConfig().save();
+        if(deleteFile) {
+            RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id, null);
+            RNPC.getPlugin().getNpcConfig().save();
+        }
     }
 
     public boolean doesExist(String id) {
@@ -111,4 +123,47 @@ public class NpcUtils {
         if(utils == null) utils = new NpcUtils();
         return utils;
     }
+
+    @SneakyThrows
+    public void setName(String id, String name) {
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".name", name);
+        RNPC.getPlugin().getNpcConfig().save();
+        delete(id, false);
+        load(id);
+    }
+
+    @SneakyThrows
+    public void setSkin(String id, String skin) {
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".skinOwner", skin);
+        RNPC.getPlugin().getNpcConfig().save();
+        delete(id, false);
+        load(id);
+    }
+
+    @SneakyThrows
+    public void showCustomName(String id, boolean show) {
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".customName", show);
+        RNPC.getPlugin().getNpcConfig().save();
+        delete(id, false);
+        load(id);
+    }
+
+    @SneakyThrows
+    public void move(String id, Location location) {
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".location", location);
+        RNPC.getPlugin().getNpcConfig().save();
+        npcIdListByString.get(id).setLocation(location);
+
+        delete(id, false);
+        load(id);
+    }
+
+    @SneakyThrows
+    public void setType(String id, String type) {
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".type", type);
+        RNPC.getPlugin().getNpcConfig().save();
+        delete(id, false);
+        load(id);
+    }
+
 }
