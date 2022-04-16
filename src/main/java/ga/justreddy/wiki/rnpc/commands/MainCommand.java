@@ -15,33 +15,67 @@ public class MainCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player))
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', tellPlayersOnly()));
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(tellPlayersOnly());
+            return true;
+        }
         Player player = (Player) sender;
         try {
             switch (args[0]) {
                 case "create":
+                    if(!player.hasPermission("rnpc.create")){
+                        player.sendMessage(tellInvalidPerms("rnpc.create"));
+                        return true;
+                    }
                     createCommand(player, args);
                     break;
                 case "delete":
+                    if(!player.hasPermission("rnpc.delete")){
+                        player.sendMessage(tellInvalidPerms("rnpc.delete"));
+                        return true;
+                    }
                     deleteCommand(player, args);
                     break;
                 case "reload":
+                    if(!player.hasPermission("rnpc.reload")){
+                        player.sendMessage(tellInvalidPerms("rnpc.reload"));
+                        return true;
+                    }
                     reloadCommand(player, args);
                     break;
                 case "setname":
+                    if(!player.hasPermission("rnpc.setname")){
+                        player.sendMessage(tellInvalidPerms("rnpc.setname"));
+                        return true;
+                    }
                     setNameCommand(player, args);
                     break;
                 case "setskin":
+                    if(!player.hasPermission("rnpc.setskin")){
+                        player.sendMessage(tellInvalidPerms("rnpc.setskin"));
+                        return true;
+                    }
                     setSkinCommand(player, args);
                     break;
                 case "showname":
+                    if(!player.hasPermission("rnpc.showname")){
+                        player.sendMessage(tellInvalidPerms("rnpc.showname"));
+                        return true;
+                    }
                     setCustomNameVisibleCommand(player, args);
                     break;
                 case "move":
+                    if(!player.hasPermission("rnpc.move")){
+                        player.sendMessage(tellInvalidPerms("rnpc.move"));
+                        return true;
+                    }
                     moveCommand(player, args);
                     break;
                 case "command":
+                    if(!player.hasPermission("rnpc.command")){
+                        player.sendMessage(tellInvalidPerms("rnpc.command"));
+                        return true;
+                    }
                     addCommand(player, args);
                     break;
                 default:
@@ -54,16 +88,16 @@ public class MainCommand implements CommandExecutor {
         return true;
     }
 
-    public String tellInvalidArguments() {
-        return "&cInvalid arguments! %syntax%";
+    public String tellInvalidArguments(String usage) {
+        return Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("invalid-arguments").replace("%usage%", usage));
     }
 
-    public String tellInvalidPerms() {
-        return "No Permissions";
+    public String tellInvalidPerms(String permission) {
+        return Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("invalid-permissions").replace("%permission%", permission));
     }
 
     public String tellPlayersOnly() {
-        return "&cOnly players can use this command";
+        return Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("players-only"));
     }
 
     private void sendHelpMessage(Player player) {
@@ -85,12 +119,13 @@ public class MainCommand implements CommandExecutor {
         try {
             String id = args[1];
             if (NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Already exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-already-exists").replace("%id%", id)));
                 return;
             }
             NpcUtils.getUtils().create(player.getLocation(), id);
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-created")));
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc create <id>"));
+            player.sendMessage(tellInvalidArguments("/npc create <id>"));
         }
     }
 
@@ -98,28 +133,29 @@ public class MainCommand implements CommandExecutor {
         try {
             String id = args[1];
             if (!NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Doesn't exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-not-exists").replace("%id%", id)));
                 return;
             }
             NpcUtils.getUtils().delete(id, true);
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-deleted")));
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage("owo");
+            player.sendMessage(tellInvalidPerms("/npc delete <id>"));
         }
     }
 
     @SneakyThrows
     private void reloadCommand(Player player, String[] args) {
-        player.sendMessage("Reloaded");
         NpcUtils.getUtils().hideNpcs();
         RNPC.getPlugin().getNpcConfig().reload();
         Bukkit.getScheduler().runTaskLater(RNPC.getPlugin(), () -> NpcUtils.getUtils().load(), 20L);
+        player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("reload")));
     }
 
     private void setNameCommand(Player player, String[] args) {
         try {
             String id = args[1];
             if (!NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Doesn't exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-not-exists").replace("%id%", id)));
                 return;
             }
 
@@ -129,9 +165,9 @@ public class MainCommand implements CommandExecutor {
             }
 
             NpcUtils.getUtils().setName(id, name);
-
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-name").replace("%name%", name)));
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc setname <id> <name>"));
+            player.sendMessage(tellInvalidArguments("/npc setname <id> <name>"));
         }
     }
 
@@ -139,16 +175,17 @@ public class MainCommand implements CommandExecutor {
         try {
             String id = args[1];
             if (!NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Doesn't exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-not-exists").replace("%id%", id)));
                 return;
             }
 
             String skin = args[2];
 
             NpcUtils.getUtils().setSkin(id, skin);
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-skin").replace("%skin%", skin)));
 
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc setskin <id> <skin>"));
+            player.sendMessage(tellInvalidArguments("/npc setskin <id> <skin>"));
         }
     }
 
@@ -156,14 +193,14 @@ public class MainCommand implements CommandExecutor {
         try {
             String id = args[1];
             if (!NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Doesn't exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-not-exists").replace("%id%", id)));
                 return;
             }
             boolean customName = Boolean.parseBoolean(args[2]);
             NpcUtils.getUtils().showCustomName(id, customName);
-            player.sendMessage(Utils.format("&aSuccessfully " + (customName ? "enabled" : "disabled") + " the showing of the name"));
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-togglename").replace("%boolean%", (customName ? "enabled" : "disabled") )));
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc setskin <id> <skin>"));
+            player.sendMessage(tellInvalidArguments( "/npc setskin <id> <skin>"));
         }
     }
 
@@ -171,13 +208,13 @@ public class MainCommand implements CommandExecutor {
         try {
             String id = args[1];
             if (!NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Doesn't exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-not-exists").replace("%id%", id)));
                 return;
             }
             NpcUtils.getUtils().move(id, player.getLocation());
-            player.sendMessage(Utils.format("&aSuccessfully moved"));
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-moved")));
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc move <id>"));
+            player.sendMessage(tellInvalidArguments("/npc move <id>"));
         }
     }
 
@@ -187,7 +224,7 @@ public class MainCommand implements CommandExecutor {
             String id = args[1];
 
             if (!NpcUtils.getUtils().doesExist(id)) {
-                player.sendMessage(id + " Doesn't exists!");
+                player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-not-exists").replace("%id%", id)));
                 return;
             }
 
@@ -209,9 +246,9 @@ public class MainCommand implements CommandExecutor {
             }
 
             NpcUtils.getUtils().addCommand(id, command.toString());
-
+            player.sendMessage(Utils.format(RNPC.getPlugin().getMessagesConfig().getConfig().getString("npc-command-add")));
         } catch (IndexOutOfBoundsException ex) {
-            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc move <id>"));
+            player.sendMessage(tellInvalidArguments("/npc move <id>"));
         }
     }
 

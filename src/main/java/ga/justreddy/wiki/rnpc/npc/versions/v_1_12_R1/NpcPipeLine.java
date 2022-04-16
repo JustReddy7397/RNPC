@@ -1,4 +1,4 @@
-package ga.justreddy.wiki.rnpc.npc.versions.v_1_10_R1;
+package ga.justreddy.wiki.rnpc.npc.versions.v_1_12_R1;
 
 import ga.justreddy.wiki.rnpc.npc.INpc;
 import ga.justreddy.wiki.rnpc.npc.NpcUtils;
@@ -6,11 +6,10 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import lombok.SneakyThrows;
-import org.bukkit.craftbukkit.v1_11_R1.*;
-import net.minecraft.server.v1_11_R1.*;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_11_R1.scoreboard.CraftScoreboard;
+import net.minecraft.server.v1_12_R1.Packet;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.UUID;
 
 public class NpcPipeLine {
 
-    private static NpcPipeLine npcPipeLine;
+    private static NpcPipeLine pipeLine;
 
     private NpcPipeLine() {}
 
@@ -90,9 +89,10 @@ public class NpcPipeLine {
         }
     }
 
+
     public static NpcPipeLine getPipeLine() {
-        if(npcPipeLine == null) npcPipeLine = new NpcPipeLine();
-        return npcPipeLine;
+        if(pipeLine == null) pipeLine = new NpcPipeLine();
+        return pipeLine;
     }
 
 

@@ -10,11 +10,25 @@
 #  | '--------------' || '--------------' || '--------------' || '--------------' |
 #   '----------------'  '----------------'  '----------------'  '----------------'
 #
-# NPCS.YML - Here are all the NPCS located.
+# MESSAGES.YML - Here you can change the messages of the plugin.
 
 # DO NOT TOUCH THIS
 config-version: 1
 
-NpcList: []
+reload: "&aSuccessfully reloaded the config files and NPCs"
 
-npc: {}
+npc-created: "&aSuccessfully created the NPC"
+npc-deleted: "&aSuccessfully removed the NPC"
+
+npc-not-exists: "&cThe NPC with the ID &4%id% &cdoes not exists."
+npc-already-exists: "&cThe NPC with the ID &4%id% &calready exists."
+
+npc-name: "&aSuccessfully set the NPC name to %name%"
+npc-skin: "&aSuccessfully set the NPC skin to %skin%"
+npc-togglename: "&aSuccessfully %boolean% the showing of the name"
+npc-moved: "&aSuccessfully moved the NPC to your position"
+npc-command-add: "&aSuccessfully added a message/player command/server action to the NPC"
+
+players-only: "&cOnly players can run this command"
+invalid-arguments: "&cInvalid arguments! &4%usage%"
+invalid-permissions: "&cYou need the %permission% permission to run this command"

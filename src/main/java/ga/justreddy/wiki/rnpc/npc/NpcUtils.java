@@ -2,6 +2,8 @@ package ga.justreddy.wiki.rnpc.npc;
 
 import ga.justreddy.wiki.rnpc.RNPC;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_10_R1.V_1_10_R1;
+import ga.justreddy.wiki.rnpc.npc.versions.v_1_11_R1.V_1_11_R1;
+import ga.justreddy.wiki.rnpc.npc.versions.v_1_12_R1.V_1_12_R1;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.V1_8_R3;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.V1_9_R2;
 import lombok.SneakyThrows;
@@ -54,8 +56,10 @@ public class NpcUtils {
                 iNpc = new V_1_10_R1(id, location);
                 break;
             case "v1_11_R1":
+                iNpc = new V_1_11_R1(id, location);
                 break;
             case "v1_12_R1":
+                iNpc = new V_1_12_R1(id, location);
                 break;
             case "v1_13_R2":
                 break;

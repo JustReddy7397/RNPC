@@ -2,12 +2,11 @@ package ga.justreddy.wiki.rnpc;
 
 import ga.justreddy.wiki.rnpc.commands.MainCommand;
 import ga.justreddy.wiki.rnpc.npc.EventManager;
-import ga.justreddy.wiki.rnpc.npc.INpc;
 import ga.justreddy.wiki.rnpc.npc.NpcUtils;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.NpcPipeLine;
-import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.V1_8_R3;
 import ga.justreddy.wiki.rnpc.utils.Utils;
 import lombok.Getter;
+import net.minecraft.server.v1_9_R2.BiomeBase;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.entity.Player;
@@ -23,11 +22,14 @@ public final class RNPC extends JavaPlugin {
 
     @Getter
     private YamlConfig npcConfig;
+    @Getter
+    private YamlConfig messagesConfig;
 
     @Getter
     private final String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
     private final int NPC_VERSION = 1;
+    private final int MESSAGES_VERSION = 1;
 
     @Override
     public void onEnable() {
@@ -46,7 +48,6 @@ public final class RNPC extends JavaPlugin {
             switch (getVersion()) {
                 case "v1_8_R3":
                     NpcPipeLine.getPipeLine().inject(p);
-                    getLogger().log(Level.INFO, "Found NMS version " + getVersion() + ", using it!");
                     break;
                 case "v1_9_R2":
                     ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.NpcPipeLine.getPipeLine().inject(p);
@@ -55,8 +56,10 @@ public final class RNPC extends JavaPlugin {
                     ga.justreddy.wiki.rnpc.npc.versions.v_1_10_R1.NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_11_R1":
+                    ga.justreddy.wiki.rnpc.npc.versions.v_1_11_R1.NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_12_R1":
+                    ga.justreddy.wiki.rnpc.npc.versions.v_1_12_R1.NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_13_R2":
                     break;
@@ -87,7 +90,14 @@ public final class RNPC extends JavaPlugin {
             currentlyLoading = "npcs.yml";
             npcConfig = new YamlConfig(currentlyLoading);
             if (npcConfig.isOutdated(NPC_VERSION)) {
-                System.out.println("Outdated ");
+                Utils.error(null, "The " + currentlyLoading + " is outdated!", true);
+                return false;
+            }
+
+            currentlyLoading = "messages.yml";
+            messagesConfig = new YamlConfig(currentlyLoading);
+            if(messagesConfig.isOutdated(MESSAGES_VERSION)) {
+                Utils.error(null, "The " + currentlyLoading + " is outdated!", true);
                 return false;
             }
 
