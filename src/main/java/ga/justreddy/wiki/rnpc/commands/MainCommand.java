@@ -40,6 +40,9 @@ public class MainCommand implements CommandExecutor {
                 case "move":
                     moveCommand(player, args);
                     break;
+                case "command":
+                    addCommand(player, args);
+                    break;
                 default:
                     sendHelpMessage(player);
                     break;
@@ -69,7 +72,7 @@ public class MainCommand implements CommandExecutor {
     private void createCommand(Player player, String[] args) {
         try{
             String id = args[1];
-            if(NpcUtils.getUtils().doesExist(id.toUpperCase())){
+            if(NpcUtils.getUtils().doesExist(id)){
                 player.sendMessage(id + " Already exists!");
                 return;
             }
@@ -82,7 +85,7 @@ public class MainCommand implements CommandExecutor {
     private void deleteCommand(Player player, String[] args) {
         try{
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id.toUpperCase())){
+            if(!NpcUtils.getUtils().doesExist(id)){
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -103,7 +106,7 @@ public class MainCommand implements CommandExecutor {
     private void setNameCommand(Player player, String[] args) {
         try{
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id.toUpperCase())){
+            if(!NpcUtils.getUtils().doesExist(id)){
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -123,7 +126,7 @@ public class MainCommand implements CommandExecutor {
     private void setSkinCommand(Player player, String[] args) {
         try{
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id.toUpperCase())){
+            if(!NpcUtils.getUtils().doesExist(id)){
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -140,7 +143,7 @@ public class MainCommand implements CommandExecutor {
     private void setCustomNameVisibleCommand(Player player, String[] args) {
         try{
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id.toUpperCase())){
+            if(!NpcUtils.getUtils().doesExist(id)){
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
@@ -155,12 +158,46 @@ public class MainCommand implements CommandExecutor {
     private void moveCommand(Player player, String[] args) {
         try{
             String id = args[1];
-            if(!NpcUtils.getUtils().doesExist(id.toUpperCase())){
+            if(!NpcUtils.getUtils().doesExist(id)){
                 player.sendMessage(id + " Doesn't exists!");
                 return;
             }
             NpcUtils.getUtils().move(id, player.getLocation());
             player.sendMessage(Utils.format("&aSuccessfully moved"));
+        }catch (IndexOutOfBoundsException ex) {
+            player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc move <id>"));
+        }
+    }
+
+    private void addCommand(Player player, String[] args) {
+        try{
+
+            String id = args[1];
+
+            if(!NpcUtils.getUtils().doesExist(id)){
+                player.sendMessage(id + " Doesn't exists!");
+                return;
+            }
+
+            StringBuilder command = new StringBuilder();
+            for (int i = 2; i < args.length; i++) {
+                command.append(args[i]).append(" ");
+            }
+
+            if(command.toString().startsWith("-s") || command.toString().startsWith("-server")) {
+                command = new StringBuilder(command.toString().replace("-s ", "server:").replace("-server ", "server:"));
+            }
+
+            if(command.toString().startsWith("-p") || command.toString().startsWith("-player")){
+                command = new StringBuilder(command.toString().replace("-p ", "player:").replace("-player ", "player:"));
+            }
+
+            if (command.toString().startsWith("-m") || command.toString().startsWith("-message")) {
+                command = new StringBuilder(command.toString().replace("-m ", "message:").replace("-message ", "message:"));
+            }
+
+            NpcUtils.getUtils().addCommand(id, command.toString());
+
         }catch (IndexOutOfBoundsException ex) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid arguments! /npc move <id>"));
         }

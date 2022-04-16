@@ -2,6 +2,7 @@ package ga.justreddy.wiki.rnpc.npc;
 
 import ga.justreddy.wiki.rnpc.RNPC;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.V1_8_R3;
+import ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.V1_9_R2;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -38,8 +39,8 @@ public class NpcUtils {
 /*        npcIdListById.remove(npcIdListByString.get(id).getEntityId());
         npcIdListByString.remove(id);
         npcIdList.remove(id);*/
-        Location location = (Location) RNPC.getPlugin().getNpcConfig().getConfig().get("npc." + id + ".location");
-        if(location != null) create(location, id);
+        Location location = (Location) RNPC.getPlugin().getNpcConfig().getConfig().get("npc." + id.toLowerCase() + ".location");
+        if(location != null) create(location, id.toLowerCase());
     }
 
     public void create(Location location, String id ) {
@@ -49,6 +50,7 @@ public class NpcUtils {
                 iNpc = new V1_8_R3(id, location);
                 break;
             case "v1_9_R2":
+                iNpc = new V1_9_R2(id, location);
                 break;
             case "v1_10_R1":
                 break;
@@ -63,9 +65,9 @@ public class NpcUtils {
             case "v1_15_R1":
                 break;
         }
-        npcIdListByString.put(id, iNpc);
+        npcIdListByString.put(id.toLowerCase(), iNpc);
         npcIdListById.put(iNpc.getEntityId(), iNpc);
-        npcIdList.add(id);
+        npcIdList.add(id.toLowerCase());
         saveNpcList();
     }
 
@@ -77,15 +79,15 @@ public class NpcUtils {
 
     @SneakyThrows
     public void delete(String id, boolean deleteFile) {
-        INpc iNpc = npcIdListByString.get(id);
+        INpc iNpc = npcIdListByString.get(id.toLowerCase());
         if(iNpc == null) return;
         iNpc.hide();
-        npcIdListByString.remove(id);
+        npcIdListByString.remove(id.toLowerCase());
         npcIdListById.remove(iNpc.getEntityId());
-        npcIdList.remove(id);
+        npcIdList.remove(id.toLowerCase());
         saveNpcList();
         if(deleteFile) {
-            RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id, null);
+            RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase(), null);
             RNPC.getPlugin().getNpcConfig().save();
         }
     }
@@ -126,7 +128,7 @@ public class NpcUtils {
 
     @SneakyThrows
     public void setName(String id, String name) {
-        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".name", name);
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase() + ".name", name);
         RNPC.getPlugin().getNpcConfig().save();
         delete(id, false);
         load(id);
@@ -134,7 +136,7 @@ public class NpcUtils {
 
     @SneakyThrows
     public void setSkin(String id, String skin) {
-        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".skinOwner", skin);
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase() + ".skinOwner", skin);
         RNPC.getPlugin().getNpcConfig().save();
         delete(id, false);
         load(id);
@@ -142,7 +144,7 @@ public class NpcUtils {
 
     @SneakyThrows
     public void showCustomName(String id, boolean show) {
-        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".customName", show);
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase() + ".customName", show);
         RNPC.getPlugin().getNpcConfig().save();
         delete(id, false);
         load(id);
@@ -150,9 +152,9 @@ public class NpcUtils {
 
     @SneakyThrows
     public void move(String id, Location location) {
-        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".location", location);
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase() + ".location", location);
         RNPC.getPlugin().getNpcConfig().save();
-        npcIdListByString.get(id).setLocation(location);
+        npcIdListByString.get(id.toLowerCase()).setLocation(location);
 
         delete(id, false);
         load(id);
@@ -160,10 +162,19 @@ public class NpcUtils {
 
     @SneakyThrows
     public void setType(String id, String type) {
-        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id + ".type", type);
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase() + ".type", type);
         RNPC.getPlugin().getNpcConfig().save();
         delete(id, false);
         load(id);
     }
 
+    @SneakyThrows
+    public void addCommand(String id, String command) {
+        List<String> commands = RNPC.getPlugin().getNpcConfig().getConfig().getStringList("npc." + id.toLowerCase() + ".commands");
+        commands.add(command);
+        RNPC.getPlugin().getNpcConfig().getConfig().set("npc." + id.toLowerCase() + ".commands", commands);
+        RNPC.getPlugin().getNpcConfig().save();
+        delete(id, false);
+        load(id);
+    }
 }

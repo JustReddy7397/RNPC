@@ -6,6 +6,7 @@ import ga.justreddy.wiki.rnpc.npc.INpc;
 import ga.justreddy.wiki.rnpc.npc.NpcUtils;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.NpcPipeLine;
 import ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3.V1_8_R3;
+import ga.justreddy.wiki.rnpc.utils.Utils;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -19,6 +20,8 @@ public final class RNPC extends JavaPlugin {
     @Getter private static RNPC plugin;
 
     @Getter private YamlConfig npcConfig;
+
+    @Getter private final String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
     private final int NPC_VERSION = 1;
 
@@ -35,11 +38,12 @@ public final class RNPC extends JavaPlugin {
 
     private void addPlayersToPipeline() {
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            switch (Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3]) {
+            switch (getVersion()) {
                 case "v1_8_R3":
                     NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_9_R2":
+                    ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.NpcPipeLine.getPipeLine().inject(p);
                     break;
                 case "v1_10_R1":
                     break;
@@ -53,6 +57,10 @@ public final class RNPC extends JavaPlugin {
                     break;
                 case "v1_15_R1":
                     break;
+                default:
+                    Utils.error(null, "Failed to find NMS version for " + getVersion() , true);
+                    break;
+
             }
         }
     }

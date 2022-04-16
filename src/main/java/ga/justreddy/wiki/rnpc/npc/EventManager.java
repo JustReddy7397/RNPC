@@ -26,6 +26,7 @@ public class EventManager implements Listener {
                 NpcPipeLine.getPipeLine().inject(e.getPlayer());
                 break;
             case "v1_9_R2":
+                ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.NpcPipeLine.getPipeLine().inject(e.getPlayer());
                 break;
             case "v1_10_R1":
                 break;
@@ -50,6 +51,7 @@ public class EventManager implements Listener {
                 NpcPipeLine.getPipeLine().inject(e.getPlayer());
                 break;
             case "v1_9_R2":
+                ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2.NpcPipeLine.getPipeLine().inject(e.getPlayer());
                 break;
             case "v1_10_R1":
                 break;

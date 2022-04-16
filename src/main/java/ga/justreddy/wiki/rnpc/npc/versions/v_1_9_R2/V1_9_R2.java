@@ -1,4 +1,4 @@
-package ga.justreddy.wiki.rnpc.npc.versions.v_1_8_R3;
+package ga.justreddy.wiki.rnpc.npc.versions.v_1_9_R2;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -7,29 +7,25 @@ import ga.justreddy.wiki.rnpc.RNPC;
 import ga.justreddy.wiki.rnpc.npc.INpc;
 import ga.justreddy.wiki.rnpc.npc.ProfileClass;
 import lombok.SneakyThrows;
-import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandMap;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.scoreboard.CraftScoreboard;
+import org.bukkit.craftbukkit.v1_9_R2.*;
+import net.minecraft.server.v1_9_R2.*;
+import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R2.scoreboard.CraftScoreboard;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-public class V1_8_R3 implements INpc {
+public class V1_9_R2 implements INpc {
 
     private final FileConfiguration config = RNPC.getPlugin().getNpcConfig().getConfig();
 
@@ -44,7 +40,7 @@ public class V1_8_R3 implements INpc {
     private List<String> npcCommands;
     private boolean customName;
 
-    public V1_8_R3(String id, Location location) {
+    public V1_9_R2(String id, Location location) {
         this.id = id;
         setLocation(location);
         initVariables();
@@ -209,7 +205,6 @@ public class V1_8_R3 implements INpc {
         PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
         connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npcAsPlayer));
         connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npcAsPlayer));
-        connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) 0));
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
             if (skinOwner != null && !skinOwner.trim().equals("")) sendNpcSkinPackets(connection);
             connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcAsPlayer));
@@ -224,14 +219,14 @@ public class V1_8_R3 implements INpc {
             }
         }, 50);
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () ->
-                connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F))),
+                        connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F))),
                 5);
     }
 
     private void sendNpcSkinPackets(PlayerConnection connection) {
         DataWatcher watcher = npcAsPlayer.getDataWatcher();
         byte bytes = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40;
-        watcher.watch(10, bytes);
+        watcher.set(new DataWatcherObject<>(12, DataWatcherRegistry.a), bytes);
         connection.sendPacket(new PacketPlayOutEntityMetadata(npcAsPlayer.getId(), watcher, true));
     }
 
@@ -328,12 +323,12 @@ public class V1_8_R3 implements INpc {
 
     private void sendServer(Player player, String serverName) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
-                ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                out.writeUTF("ConnectOther");
-                out.writeUTF(player.getName());
-                out.writeUTF(serverName);
-                Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(RNPC.getPlugin(), "BungeeCord");
-                player.sendPluginMessage(RNPC.getPlugin(), "BungeeCord", out.toByteArray());
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("ConnectOther");
+            out.writeUTF(player.getName());
+            out.writeUTF(serverName);
+            Bukkit.getServer().getMessenger().registerOutgoingPluginChannel(RNPC.getPlugin(), "BungeeCord");
+            player.sendPluginMessage(RNPC.getPlugin(), "BungeeCord", out.toByteArray());
         }, 2);
     }
 
@@ -364,4 +359,5 @@ public class V1_8_R3 implements INpc {
         field.setAccessible(true);
         return (CommandMap) field.get(Bukkit.getServer());
     }
+
 }
