@@ -218,9 +218,9 @@ public class V1_9_R2 implements INpc {
                 team.setNameTagVisibility(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS);
             }
         }, 50);
-        Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () ->
-                        connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F))),
-                5);
+        connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F)));
+        connection.sendPacket(new PacketPlayOutEntity.PacketPlayOutEntityLook(getEntityId(), (byte)(location.getYaw() * 256 / 360), (byte)(location.getPitch() * 256 / 360), true));
+
     }
 
     private void sendNpcSkinPackets(PlayerConnection connection) {

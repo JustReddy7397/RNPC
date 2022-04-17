@@ -209,7 +209,6 @@ public class V1_8_R3 implements INpc {
         PlayerConnection connection = ((CraftPlayer) player).getHandle().playerConnection;
         connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, npcAsPlayer));
         connection.sendPacket(new PacketPlayOutNamedEntitySpawn(npcAsPlayer));
-        connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) 0));
         Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () -> {
             if (skinOwner != null && !skinOwner.trim().equals("")) sendNpcSkinPackets(connection);
             connection.sendPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, npcAsPlayer));
@@ -223,9 +222,8 @@ public class V1_8_R3 implements INpc {
                 team.setNameTagVisibility(ScoreboardTeamBase.EnumNameTagVisibility.ALWAYS);
             }
         }, 50);
-        Bukkit.getScheduler().scheduleSyncDelayedTask(RNPC.getPlugin(), () ->
-                connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F))),
-                5);
+        connection.sendPacket(new PacketPlayOutEntityHeadRotation(npcAsPlayer, (byte) ((location.getYaw() * 256.0F) / 360.0F)));
+        connection.sendPacket(new PacketPlayOutEntity.PacketPlayOutEntityLook(getEntityId(), (byte)(location.getYaw() * 256 / 360), (byte)(location.getPitch() * 256 / 360), true));
     }
 
     private void sendNpcSkinPackets(PlayerConnection connection) {

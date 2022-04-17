@@ -27,7 +27,7 @@ npc-name: "&aSuccessfully set the NPC name to %name%"
 npc-skin: "&aSuccessfully set the NPC skin to %skin%"
 npc-togglename: "&aSuccessfully %boolean% the showing of the name"
 npc-moved: "&aSuccessfully moved the NPC to your position"
-npc-command-add: "&aSuccessfully added a message/player command/server action to the NPC"
+npc-command-add: "&aSuccessfully added a %type% action to the NPC"
 
 players-only: "&cOnly players can run this command"
 invalid-arguments: "&cInvalid arguments! &4%usage%"
